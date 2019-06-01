@@ -1,6 +1,6 @@
 <img height="100" width="100%" src="./logo.svg"/>
 
-# <center>Node.js miltithreded runner</center>
+# <center>Node.js multithreded executer</center>
 
 # Classes
 
@@ -61,6 +61,15 @@ interface Worker<MessageType> {
   }
 )()
 ```
+# On using the REPL
+Paralio comes a built-in repl to make your (mine) life easier. It lets you access the app instance and run some useful commands.
+## self
+You can access the main app instance with the `self` variable. I.e.: `> self.output`
+## .save <path>
+Let's you save the output to a specified path (defaults to the cwd).
+## .rerun
+In case you want to rerun your application, here you go!
+
 
 # Motivation
-I was basically scraping some information of the [wikipedia](https://www.wikipedia.org/). It was taking a few minutes to run over **just 54 pages**. So I thought to myself "What can I do to speed it up?" and the obvious answer came to my mind: **multi-thereding**. The idea itself was brilliant, but I ran into some problems, namely: overloading my cpu with 54 processes. Then I decided to limit the number of processes data at one time and it worked. After that some improvements came to my mind and bada bim, bada boom - **Paralio** got born. 
+I was basically scraping some information of the [wikipedia](https://www.wikipedia.org/). It was taking a few minutes to run over **just 54 pages**. So I thought to myself "What can I do to speed it up?" and the obvious answer came to my mind: **multi-threading**. The idea itself was brilliant, but I ran into some problems, namely: overloading my cpu with 54 processes... Then I decided to limit the number of processes data at one time and it worked. After that some improvements came to my mind and bada bim, bada boom - **Paralio** was born. 

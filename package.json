@@ -1,15 +1,23 @@
 {
   "name": "paralio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Multithreaded Node.js executer",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug": "ts-node debug/index.ts",
-    "build": "tsc -P ."
+    "build": "tsc -P .",
+    "prepublish": "npm run build"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "parallel",
+    "multi",
+    "multithreaded",
+    "thread",
+    "node",
+    "node.js"
+  ],
+  "author": "DerivedMate",
   "license": "ISC",
   "devDependencies": {
     "@types/axios": "^0.14.0",
