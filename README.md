@@ -62,7 +62,7 @@ interface Worker<MessageType> {
 )()
 ```
 # On using the REPL
-Paralio comes a built-in repl to make your (mine) life easier. It lets you access the app instance and run some useful commands.
+Paralio comes a built-in repl to make your (my) life easier. It lets you access the app instance and run some useful commands.
 ## self
 You can access the main app instance with the `self` variable. I.e.: `> self.output`
 ## .save <path>

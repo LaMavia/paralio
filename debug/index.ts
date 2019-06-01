@@ -34,7 +34,6 @@ async function main() {
 
   app.on('end', (self: Paralio<string, string>) => {
     self.output = self.output.filter(x => !!x).sort()
-    console.log(`Finished with ${self.output.length} results!`)
   })
 
   // app.on('consume', ([rest, item]) => {

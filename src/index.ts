@@ -146,6 +146,7 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
       wk.send(this.consume())
     }
 
+    this.log("Starting the app...")
     this.emit('start', this)
   }
 
@@ -154,7 +155,12 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
       this.output.push(data)
       if (this.end()) {
         w.kill()
-        if (--this.workers <= 0) this.emit('end', this)
+        if (--this.workers <= 0) {
+          this.emit('end', this)
+          process.nextTick(() =>
+            this.log(`Finished with ${this.output.length} results`)
+          )
+        }
       } else {
         w.send(this.consume())
       }
