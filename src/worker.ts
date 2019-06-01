@@ -1,4 +1,4 @@
-export abstract class Worker<MessageType> {
+export abstract class Worker<MessageType = string> {
   constructor() {
     process.on('message', async (msg: MessageType) => {
       const p = this.onMessage(msg)
@@ -23,17 +23,4 @@ export abstract class Worker<MessageType> {
   onMessage(msg: MessageType): Promise<any> | void {
     return void 0
   }
-}
-
-/**
- * @description A Helper command for starking worker. Used instead of writing: 
- ```javascript
- const worker = (new class extends Worker {...})()
- ```
- * @param {typeof Worker} workerClass 
- */
-export const s = <T extends new (...args: any[]) => Worker<any>>(
-  workerClass: T
-) => {
-  return new workerClass()
 }

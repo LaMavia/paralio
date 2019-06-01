@@ -26,7 +26,11 @@ async function main() {
     'https://pl.wikipedia.org/wiki/Maria_Janion',
     'https://pl.wikipedia.org/wiki/Aldona_Jaw%C5%82owska',
   ]
-  const app = new Paralio(4, resolve(__dirname, './worker'), urls.slice())
+  const app = new Paralio({
+    max: 4,
+    workerPath: resolve(__dirname, './worker'),
+    input: urls.slice(),
+  })
 
   app.on('end', (self: Paralio<string, string>) => {
     self.output = self.output.filter(x => !!x).sort()
