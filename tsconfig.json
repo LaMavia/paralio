@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    // "lib": ["esnext", "es2015", "dom"],
+    "outDir": "./dist",
+    "declaration": true,
+    "composite": true, 
+    "rootDir": "./src/",
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+  },
+  "exclude": [
+    "node_modules/"
+  ],
+  "include": [
+    "./src/**/*", 
+    // "types.d.ts"
+  ]
+}
