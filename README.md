@@ -51,15 +51,13 @@ interface Worker<MessageType> {
   onMessage(msg: MessageType): Promise<any> | void
 }
 
-(
-  class extends Worker {
-    onMessage(msg) {
-      /* It can be either a value or a Promise */
-      const output = Process_the_input(msg)
-      return output
-    }
+new class extends Worker {
+  onMessage(msg) {
+    /* It can be either a value or a Promise */
+    const output = Process_the_input(msg)
+    return output
   }
-)()
+}()
 ```
 # On using the REPL
 Paralio comes a built-in repl to make your (my) life easier. It lets you access the app instance and run some useful commands.

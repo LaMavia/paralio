@@ -1,6 +1,6 @@
 {
   "name": "paralio",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Multithreaded Node.js executer",
   "main": "dist/index.js",
   "scripts": {
@@ -17,7 +17,11 @@
     "node",
     "node.js"
   ],
-  "author": "DerivedMate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DerivedMate/paralio"
+  },
+  "author": "LastShadowPL (DerivedMate)",
   "license": "ISC",
   "devDependencies": {
     "@types/axios": "^0.14.0",

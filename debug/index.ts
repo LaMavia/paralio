@@ -32,7 +32,7 @@ async function main() {
     input: urls.slice(),
   })
 
-  app.on('end', (self: Paralio<string, string>) => {
+  app.on('end', self => {
     self.output = self.output.filter(x => !!x).sort()
   })
 

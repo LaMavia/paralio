@@ -14,7 +14,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch current file w/ ts-node",
+      "name": "ts: current",
       "protocol": "inspector",
       "args": ["${relativeFile}"],
       "cwd": "${workspaceRoot}",

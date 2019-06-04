@@ -1,6 +1,7 @@
 export abstract class Worker<MessageType = string> {
   constructor() {
     process.on('message', async (msg: MessageType) => {
+      if(!msg) return;
       const p = this.onMessage(msg)
       let res =
         !p ||
@@ -8,7 +9,7 @@ export abstract class Worker<MessageType = string> {
           console.log(
             `[W:${process.pid}]> ERROR: "${err.message}"\nSTACK: ${
               err.stack
-            }; Bailing out!`
+            };\n MESSAGE: ${msg};\n Bailing out!`
           )
           process.disconnect()
         }))
