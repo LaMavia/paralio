@@ -1,6 +1,7 @@
 import Axios from 'axios'
 import { JSDOM } from 'jsdom'
 import { Worker } from '../src'
+import { Context } from '.'
 // import cl from 'cluster'
 
 function onDocJsDom(html: string) {
@@ -13,7 +14,7 @@ function onDocJsDom(html: string) {
     : ''
 }
 
-new class extends Worker<string> {
+new class extends Worker<string, Context> {
   onMessage(msg: string) {
     return Axios.get(msg)
       .then(r => r.data)

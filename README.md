@@ -12,7 +12,7 @@ The `Paralio` class is the heart of your application.
 import { Paralio } from 'paralio'
 import { resolve } from 'path'
 
-interface Paralio<Input, Output> {
+interface Paralio<Input, Output, Context> {
   max: number // The limit of running processes
   workerPath: string // Path to the worker script
   workers: number // The number of running workers
@@ -20,15 +20,18 @@ interface Paralio<Input, Output> {
   output: Output[] // The output array
   _input: Input[] // The consumed input data
   repl: repl.REPLServer // The exposed REPL server
+  context: Context // The key-value map passed to every worker
   /*...*/
 }
 
 const app = new Paralio({
-  max: 4,
+  max: 4, // defaults to the number of cpus
   workerPath: resolve(__dirname, './worker'),
-  input: [
-    /*Some input data (it has to be an array!)*/
-  ],
+  input: [], // or you can give it a path to a file: resolve(__dirname, 'input.txt')
+  onInputLoaded(rawFile: string) {
+    /*process the data*/
+    return JSON.parse(rawFile)
+  }
 })
 
 /* Called after initializing all of the workers */
@@ -46,8 +49,8 @@ The class for worker files.
 ```typescript
 import { Worker } from "paralio"
 
-interface Worker<MessageType> {
-  constructor()
+interface Worker<MessageType, Context> {
+  context: Context // Context passed from the master
   onMessage(msg: MessageType): Promise<any> | void
 }
 

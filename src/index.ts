@@ -1,18 +1,22 @@
-import { EventEmitter } from 'events'
-import cl from 'cluster'
-import repl from 'repl'
-import fs from "fs"
+import cl from 'cluster';
+import { EventEmitter } from 'events';
+import fs from "fs";
+import { cpus } from 'os';
 import { resolve } from 'path';
+import repl from 'repl';
+import { logo } from './static_data';
 
-export * from './worker'
+export * from './worker';
 
-interface ParalioConfiguration<Input> {
-  max: number
+interface ParalioConfiguration<Input, Context = {[key: string]: any}> {
+  max?: number
+  input?: Input[] | string
   workerPath: string
-  input: Input[]
+  context?: Context
+  onInputLoaded?: (string) => Input[]
 }
 
-export class Paralio<Input = any, Output = any> extends EventEmitter {
+export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> extends EventEmitter {
   output: Output[] = []
   workers: number = 0
   input: Input[]
@@ -20,14 +24,17 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
   max: number
   workerPath: string
   repl: repl.REPLServer
+  context: Context | {[key: string]: any}
 
-  constructor(config: ParalioConfiguration<Input>) {
+  constructor(config: ParalioConfiguration<Input, Context>) {
     super()
-    this.input = config.input
-    this.max = config.max
+    this.input = this.loadInput(config)
+    this.max = config.max || cpus().length
+    this.context = config.context || {}
     this.workerPath = config.workerPath
     this.repl = this.initREPL()
     process.on('beforeExit', () => {
+      console.log("Goodbye mate!")
       for (const id in cl.workers) (cl.workers[id] as cl.Worker).kill()
     })
     this.run()
@@ -38,7 +45,7 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
   on(
     event: 'consume',
     listener: (items: [Input[], Input | undefined]) => any
-  ): any
+    ): any
   on(event: string, listener: (...args: any[]) => any): any {
     super.on(event, listener)
   }
@@ -47,7 +54,7 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
   emit(event: 'end', data: Paralio): any
   emit(event: 'consume', data: [Input[], Input | undefined]): any
   emit(event: string, data: any): any {
-    super.emit(event, data)
+    return super.emit(event, data)
   }
 
   consume() {
@@ -55,6 +62,19 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
     const item = this._input.pop()
     this.emit('consume', [this._input, item])
     return item || null
+  }
+
+  loadInput({ input, onInputLoaded }: ParalioConfiguration<Input, Context>): Input[] {
+    switch(true) {
+      case (Array.isArray(input)): {
+        return input as Input[];
+      }
+      case (typeof input === "string" && !!input): {
+        const data = fs.readFileSync(input as string, {encoding: "utf-8"})
+        return onInputLoaded ? onInputLoaded(data) : []
+      }
+      default: throw new Error(`Input is neither array, nor a string; ${JSON.stringify(input, null, 2)}`)
+    }
   }
 
   end() {
@@ -70,9 +90,7 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
 
   displayLogo(clear: boolean = true) {
     clear && console.clear()
-    console.log([
-      '095', '095', '095', '095', '095', '095', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '095', '032', '095', '032', '032', '032', '032', '032', '032', '032', '013', '010', '124', '032', '095', '095', '095', '032', '092', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '032', '124', '032', '040', '095', '041', '032', '032', '032', '032', '032', '032', '013', '010', '124', '032', '124', '095', '047', '032', '047', '095', '032', '095', '032', '095', '032', '095', '095', '032', '095', '095', '032', '095', '124', '032', '124', '095', '032', '032', '095', '095', '095', '032', '032', '013', '010', '124', '032', '032', '095', '095', '047', '032', '095', '096', '032', '124', '032', '039', '095', '095', '047', '032', '095', '096', '032', '124', '032', '124', '032', '124', '047', '032', '095', '032', '092', '032', '013', '010', '124', '032', '124', '032', '124', '032', '040', '095', '124', '032', '124', '032', '124', '032', '124', '032', '040', '095', '124', '032', '124', '032', '124', '032', '124', '032', '040', '095', '041', '032', '124', '013', '010', '092', '095', '124', '032', '032', '092', '095', '095', '044', '095', '124', '095', '124', '032', '032', '092', '095', '095', '044', '095', '124', '095', '124', '095', '124', '092', '095', '095', '095', '047',
-    ].map(x => String.fromCharCode(+x)).join(''), `\n\n`)
+    console.log(logo, `\n\n`)
   }
 
   save(path?: string): Promise<string> {
@@ -143,11 +161,15 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
       this.workers++
 
       wk.on('message', this.initOnMessage(wk))
-      wk.send(this.consume())
+      wk.send(this.package())
     }
 
     this.log("Starting the app...")
     this.emit('start', this)
+  }
+
+  package(): [Input | null, Context] {
+    return [this.consume(), this.context as Context]
   }
 
   initOnMessage(w: cl.Worker) {
@@ -162,7 +184,7 @@ export class Paralio<Input = any, Output = any> extends EventEmitter {
           )
         }
       } else {
-        w.send(this.consume())
+        w.send(this.package())
       }
     }
   }
