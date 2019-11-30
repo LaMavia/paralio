@@ -12,7 +12,7 @@ async function main() {
     input: resolve(__dirname, "./input.json"),
     context: {
       name: "Bob"
-    } as Context,
+    },
     onInputLoaded: JSON.parse
   })
 

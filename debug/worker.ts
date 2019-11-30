@@ -14,10 +14,18 @@ function onDocJsDom(html: string) {
     : ''
 }
 
-new class extends Worker<string, Context> {
+new (class extends Worker<string, Context> {
   onMessage(msg: string) {
     return Axios.get(msg)
       .then(r => r.data)
       .then(onDocJsDom)
   }
-}()
+
+  onMount() {
+    console.log('Hello\n> ')
+  }
+
+  onDismount() {
+    console.log('Bye\n> ')
+  }
+})()

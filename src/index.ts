@@ -1,14 +1,14 @@
-import cl from 'cluster';
-import { EventEmitter } from 'events';
-import fs from "fs";
-import { cpus } from 'os';
-import { resolve } from 'path';
-import repl from 'repl';
-import { logo } from './static_data';
+import cl from 'cluster'
+import { EventEmitter } from 'events'
+import fs from 'fs'
+import { cpus } from 'os'
+import { resolve } from 'path'
+import repl from 'repl'
+import { logo } from './static_data'
 
-export * from './worker';
+export * from './worker'
 
-interface ParalioConfiguration<Input, Context = {[key: string]: any}> {
+interface ParalioConfiguration<Input, Context = { [key: string]: any }> {
   max?: number
   input?: Input[] | string
   workerPath: string
@@ -16,7 +16,11 @@ interface ParalioConfiguration<Input, Context = {[key: string]: any}> {
   onInputLoaded?: (string) => Input[]
 }
 
-export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> extends EventEmitter {
+export class Paralio<
+  Input = any,
+  Output = any,
+  Context = { [key: string]: any }
+> extends EventEmitter {
   output: Output[] = []
   workers: number = 0
   input: Input[]
@@ -24,7 +28,7 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
   max: number
   workerPath: string
   repl: repl.REPLServer
-  context: Context | {[key: string]: any}
+  context: Context | { [key: string]: any }
 
   constructor(config: ParalioConfiguration<Input, Context>) {
     super()
@@ -34,7 +38,7 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
     this.workerPath = config.workerPath
     this.repl = this.initREPL()
     process.on('beforeExit', () => {
-      console.log("Goodbye mate!")
+      console.log('Goodbye mate!')
       for (const id in cl.workers) (cl.workers[id] as cl.Worker).kill()
     })
     this.run()
@@ -45,7 +49,8 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
   on(
     event: 'consume',
     listener: (items: [Input[], Input | undefined]) => any
-    ): any
+  ): any
+  on(event: 'data', listener: (data: Output) => any): any
   on(event: string, listener: (...args: any[]) => any): any {
     super.on(event, listener)
   }
@@ -53,6 +58,7 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
   emit(event: 'start', data: Paralio): any
   emit(event: 'end', data: Paralio): any
   emit(event: 'consume', data: [Input[], Input | undefined]): any
+  emit(event: 'data', data: Output): any
   emit(event: string, data: any): any {
     return super.emit(event, data)
   }
@@ -64,16 +70,26 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
     return item || null
   }
 
-  loadInput({ input, onInputLoaded }: ParalioConfiguration<Input, Context>): Input[] {
-    switch(true) {
-      case (Array.isArray(input)): {
-        return input as Input[];
+  loadInput({
+    input,
+    onInputLoaded,
+  }: ParalioConfiguration<Input, Context>): Input[] {
+    switch (true) {
+      case Array.isArray(input): {
+        return input as Input[]
       }
-      case (typeof input === "string" && !!input): {
-        const data = fs.readFileSync(input as string, {encoding: "utf-8"})
+      case typeof input === 'string' && !!input: {
+        const data = fs.readFileSync(input as string, { encoding: 'utf-8' })
         return onInputLoaded ? onInputLoaded(data) : []
       }
-      default: throw new Error(`Input is neither array, nor a string; ${JSON.stringify(input, null, 2)}`)
+      default:
+        throw new Error(
+          `Input is neither array, nor a string; ${JSON.stringify(
+            input,
+            null,
+            2
+          )}`
+        )
     }
   }
 
@@ -96,14 +112,22 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
   save(path?: string): Promise<string> {
     return new Promise((res, rej) => {
       const d = new Date()
-      const p = resolve(path || process.cwd(), `./output-${d.getDay()}.${d.getMonth()}.${d.getFullYear()}-${d.getHours()}:${d.getMinutes()}.json`)
+      const p = resolve(
+        path || process.cwd(),
+        `./output-${d.getDay()}.${d.getMonth()}.${d.getFullYear()}-${d.getHours()}:${d.getMinutes()}.json`
+      )
 
-      fs.writeFile(p, JSON.stringify(this.output, null, 2), {
-        encoding: "utf-8"
-      }, (err) => {
-        if(err) rej(err)
-        else res(p)
-      })
+      fs.writeFile(
+        p,
+        JSON.stringify(this.output, null, 2),
+        {
+          encoding: 'utf-8',
+        },
+        err => {
+          if (err) rej(err)
+          else res(p)
+        }
+      )
     })
   }
 
@@ -117,13 +141,13 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
     const self = this
 
     r.displayPrompt()
-    r.defineCommand("rerun", (x) => {
-      r.question("Are you sure you wanna rerun the app? [y/n]", a => {
-        if(['y', "y", "Yes", "yes", "yep", "sure"].some(x => x === a)) {
+    r.defineCommand('rerun', x => {
+      r.question('Are you sure you wanna rerun the app? [y/n]', a => {
+        if (['y', 'y', 'Yes', 'yes', 'yep', 'sure'].some(x => x === a)) {
           this.run()
-          this.log("Rerunning the application...")
+          this.log('Rerunning the application...')
         } else {
-          this.log("Fine...")
+          this.log('Fine...')
         }
       })
     })
@@ -147,7 +171,7 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
       writable: false,
       value: self,
     })
-    
+
     return r
   }
 
@@ -155,6 +179,10 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
     cl.setupMaster({
       exec: this.workerPath,
     })
+
+    this.log('Starting the app...')
+    this.emit('start', this)
+    
     for (let i = 0; i < this.max; i++) {
       if (this._input.length <= 0) break
       const wk = cl.fork()
@@ -163,9 +191,6 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
       wk.on('message', this.initOnMessage(wk))
       wk.send(this.package())
     }
-
-    this.log("Starting the app...")
-    this.emit('start', this)
   }
 
   package(): [Input | null, Context] {
@@ -175,6 +200,7 @@ export class Paralio<Input = any, Output = any, Context = {[key: string]: any}> 
   initOnMessage(w: cl.Worker) {
     return (data: Output) => {
       this.output.push(data)
+      this.emit('data', data)
       if (this.end()) {
         w.kill()
         if (--this.workers <= 0) {

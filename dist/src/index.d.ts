@@ -29,11 +29,13 @@ export declare class Paralio<Input = any, Output = any, Context = {
     on(event: 'start', listener: (app: Paralio) => any): any;
     on(event: 'end', listener: (app: Paralio) => any): any;
     on(event: 'consume', listener: (items: [Input[], Input | undefined]) => any): any;
+    on(event: 'data', listener: (data: Output) => any): any;
     emit(event: 'start', data: Paralio): any;
     emit(event: 'end', data: Paralio): any;
     emit(event: 'consume', data: [Input[], Input | undefined]): any;
+    emit(event: 'data', data: Output): any;
     consume(): Input | null;
-    loadInput({ input, onInputLoaded }: ParalioConfiguration<Input, Context>): Input[];
+    loadInput({ input, onInputLoaded, }: ParalioConfiguration<Input, Context>): Input[];
     end(): boolean;
     run(): void;
     displayLogo(clear?: boolean): void;

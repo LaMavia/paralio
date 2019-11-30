@@ -1,6 +1,6 @@
 {
   "name": "paralio",
-  "version": "1.0.3",
+  "version": "1.1.1",
   "description": "Multithreaded Node.js executer",
   "main": "dist/index.js",
   "scripts": {

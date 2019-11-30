@@ -5,9 +5,12 @@ export abstract class Worker<
   context: { [key: string]: any } | ContextType = {}
 
   constructor() {
-    process.on('newListener', l => {
-      // process.stdout.write(`[Worker]> New worker #${process.pid} connected!`)
-       console.log(`[Worker]> New worker #${process.pid} connected!`)
+    process.on('newListener', async l => {
+      await this.onMount()
+      console.log(`[Worker]> New worker #${process.pid} connected!`)
+
+      // -------- Fake dispaying the prompt -------- //
+      process.stdout.write('> ')
     })
 
     process.on('message', async ([msg, ctx]: [MessageType, ContextType]) => {
@@ -27,9 +30,25 @@ export abstract class Worker<
           : p
       process.send && process.send(res)
     })
+
+    process.on('beforeExit', async () => {
+      try {
+        await this.onDismount()
+      } catch (e) {
+        console.error(e)
+      }
+    })
   }
 
   onMessage(msg: MessageType): Promise<any> | void {
+    return void 0
+  }
+
+  onMount(): Promise<any> | void {
+    return void 0
+  }
+
+  onDismount(): Promise<any> | void {
     return void 0
   }
 }
