@@ -22,7 +22,7 @@ new (class extends Worker<string, Context> {
   }
 
   onMount() {
-    console.log('Hello\n> ')
+    console.log('\n> Hello')
   }
 
   onDismount() {

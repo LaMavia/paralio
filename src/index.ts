@@ -13,6 +13,7 @@ interface ParalioConfiguration<Input, Context = { [key: string]: any }> {
   input?: Input[] | string
   workerPath: string
   context?: Context
+  repl?: boolean
   onInputLoaded?: (string) => Input[]
 }
 
@@ -27,7 +28,7 @@ export class Paralio<
   _input: Input[] = []
   max: number
   workerPath: string
-  repl: repl.REPLServer
+  repl: repl.REPLServer | null
   context: Context | { [key: string]: any }
 
   constructor(config: ParalioConfiguration<Input, Context>) {
@@ -36,7 +37,7 @@ export class Paralio<
     this.max = config.max || cpus().length
     this.context = config.context || {}
     this.workerPath = config.workerPath
-    this.repl = this.initREPL()
+    this.repl = config.repl === false ? null : this.initREPL()
     process.on('beforeExit', () => {
       console.log('Goodbye mate!')
       for (const id in cl.workers) (cl.workers[id] as cl.Worker).kill()
@@ -50,7 +51,7 @@ export class Paralio<
     event: 'consume',
     listener: (items: [Input[], Input | undefined]) => any
   ): any
-  on(event: 'data', listener: (data: Output) => any): any
+  on(event: 'data', listener: ([data, app]: [Output, Paralio]) => any): any
   on(event: string, listener: (...args: any[]) => any): any {
     super.on(event, listener)
   }
@@ -58,7 +59,7 @@ export class Paralio<
   emit(event: 'start', data: Paralio): any
   emit(event: 'end', data: Paralio): any
   emit(event: 'consume', data: [Input[], Input | undefined]): any
-  emit(event: 'data', data: Output): any
+  emit(event: 'data', data: [Output, Paralio]): any
   emit(event: string, data: any): any {
     return super.emit(event, data)
   }
@@ -98,7 +99,7 @@ export class Paralio<
   }
 
   run() {
-    this.displayLogo()
+    this.repl && this.displayLogo()
     this.output = []
     this._input = this.input.slice()
     this.initWorkers()
@@ -133,7 +134,7 @@ export class Paralio<
 
   log(...args: any[]) {
     console.log(...args)
-    this.repl.prompt()
+    this.repl && this.repl.prompt()
   }
 
   initREPL() {
@@ -182,7 +183,7 @@ export class Paralio<
 
     this.log('Starting the app...')
     this.emit('start', this)
-    
+
     for (let i = 0; i < this.max; i++) {
       if (this._input.length <= 0) break
       const wk = cl.fork()
@@ -200,7 +201,7 @@ export class Paralio<
   initOnMessage(w: cl.Worker) {
     return (data: Output) => {
       this.output.push(data)
-      this.emit('data', data)
+      this.emit('data', [data, this])
       if (this.end()) {
         w.kill()
         if (--this.workers <= 0) {

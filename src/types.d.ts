@@ -1,6 +1,4 @@
-declare namespace NodeJS {
-  export interface Process {
-    on(event: 'mount', handler: () => Promise<any> | void)
-    on(event: 'dismount', handler: () => Promise<any> | void)
-  }
+declare interface BasicContext {
+  [key: string]: any
+  repl: boolean
 }

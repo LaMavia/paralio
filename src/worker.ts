@@ -1,16 +1,17 @@
-export abstract class Worker<
-  MessageType = string,
-  ContextType = { [key: string]: any }
-> {
-  context: { [key: string]: any } | ContextType = {}
+export abstract class Worker<MessageType = string, ContextType = BasicContext> {
+  context: BasicContext & ContextType = {
+    ui: 'repl',
+  } as any
 
   constructor() {
     process.on('newListener', async l => {
       await this.onMount()
-      console.log(`[Worker]> New worker #${process.pid} connected!`)
+      if (this.context.repl) {
+        console.log(`[Worker]> New worker #${process.pid} connected!`)
 
-      // -------- Fake dispaying the prompt -------- //
-      process.stdout.write('> ')
+        // -------- Fake dispaying the prompt -------- //
+        process.stdout.write('> ')
+      }
     })
 
     process.on('message', async ([msg, ctx]: [MessageType, ContextType]) => {

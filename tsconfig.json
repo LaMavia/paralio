@@ -10,7 +10,11 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": [
+      "./src/types",
+      "node"
+    ]
   },
   "exclude": ["node_modules/"],
   "include": ["./src/**/*"]
