@@ -4,6 +4,7 @@
     "module": "commonjs",
     // "lib": ["esnext", "es2015", "dom"],
     "outDir": "./dist",
+    "rootDir": "./src/",
     "declaration": true,
     "composite": true,
     "strict": true,

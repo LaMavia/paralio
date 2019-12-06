@@ -1,4 +1,4 @@
-import { Paralio } from '../src'
+import { Paralio } from '../dist' 
 import { resolve } from 'path'
 
 export interface Context {
